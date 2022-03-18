@@ -12,9 +12,12 @@ CREATE TABLE note(
     note_id SERIAL,
     user_id UUID,
     title VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
     category VARCHAR(255) NOT NULL,
-    timestamp timestamp default current_timestamp,
     PRIMARY KEY (note_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+-- timestamp timestamp default current_timestamp,
+-- test user
+insert into users (user_name, user_email, user_password)
+values ('Jesus', 'jesus@gmail.com', '123456');
