@@ -1,0 +1,26 @@
+### Big Pieces Of Our Application
+
+1-Frontend:
+• React.js
+
+2-Backend:
+• Node js, Express.js
+
+
+3-Authentication:
+• User authentication with JWT
+
+
+4-Data design
+# PostgresSQL
+
+• Table structures
+• Indexes
+• Store procedures
+• Make sure we have the right queries in place.
+
+5-Local storage
+
+6-Infinite scrolling-lazy loading objects into the page.
+
+7-JavaScript, HTML, CSS

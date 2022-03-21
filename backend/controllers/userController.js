@@ -22,7 +22,7 @@ const registerUser = async (req, res) => {
     );
 
     if (userExits.rows.length !== 0) {
-      return res.status(400).send("An account already exists with this email.");
+      return res.status(401).send("An account already exists with this email.");
     }
 
     //3. Bcrypt th user password
@@ -39,13 +39,50 @@ const registerUser = async (req, res) => {
     //if user is create
     if (user) {
       res.status(201).json({
-        token: generateToken(user.user_id),
+        user_id: user.rows[0].user_id,
+        user_name: user.rows[0].user_name,
+        user_email: user.rows[0].user_email,
+        token: generateToken(user.rows[0].user_id),
       });
     } else {
       res.status(400).send("Invalid user data");
       //   throw new Error("Invalid user data");
     }
   } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
+// @desc    Login a user
+// @route   /auth/login
+// @access  Public
+const loginUser = async (req, res) => {
+  try {
+    //1. destructure the req.body
+    const { email, password } = req.body;
+    //2. check if user doest exits (if not, then we throw error)
+    //find user by email
+    const user = await pool.query("SELECT * FROM users WHERE user_email = $1", [
+      email,
+    ]);
+    if (user.rows.length === 0) {
+      return res.status(401).json("Invalid credentials");
+    }
+    //3. Compare the plain text password to hashed password match
+    if (user && (await bcrypt.compare(password, user.rows[0].user_password))) {
+      res.status(200).json({
+        user_id: user.rows[0].user_id,
+        user_name: user.rows[0].user_name,
+        user_email: user.rows[0].user_email,
+        token: generateToken(user.rows[0].user_id),
+      });
+    } else {
+      return res.status(401).json("Invalid credentials");
+    }
+
+    //4. give them jwt token
+  } catch (error) {
     console.error(err.message);
     res.status(500).send("Server error");
   }
@@ -60,4 +97,4 @@ const generateToken = (user_id) => {
   });
 };
 //export our functions
-module.exports = { registerUser };
+module.exports = { registerUser, loginUser };
