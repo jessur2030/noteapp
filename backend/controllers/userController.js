@@ -69,7 +69,7 @@ const loginUser = async (req, res) => {
     if (user.rows.length === 0) {
       return res.status(401).json("Invalid credentials");
     }
-    //3. Compare the plain text password to hashed password match
+    //3. check if user incoming plain text password match to hashed password on our database
     if (user && (await bcrypt.compare(password, user.rows[0].user_password))) {
       res.status(200).json({
         user_id: user.rows[0].user_id,
