@@ -1,26 +1,41 @@
+const pool = require("../config/db");
 const jwt = require("jsonwebtoken");
 
-//protect middleware
+//protect route function middleware
 const protect = async (req, res, next) => {
-  try {
-    //
-    const jwtToken = req.header("token");
-    if (!jwtToken) {
-      return res.status(401).json("Not Authorize");
+  let token;
+  //check for token in the headers
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      //Get token from headers
+      token = req.headers.authorization.split(" ")[1];
+
+      //Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // console.log(decoded);
+
+      //Get user from token
+      req.user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
+        decoded.id,
+      ]);
+      // console.log(req.user);
+
+      //call next
+      next();
+    } catch (error) {
+      //
+      console.error(error.message);
+      res.status(401).send("Not authorized");
     }
+  }
 
-    //Verified jwt
-    const payload = jwt.verify(jwtToken, process.env.JWT_SECRET);
-
-    //put payload into the req.user object
-    req.user = payload;
-
-    //
-  } catch (error) {
+  if (!token) {
     console.error(error.message);
-    return res.status(401).json("Not Authorize");
+    res.status(401).send("Not authorized");
   }
 };
 
-//export protect
 module.exports = { protect };

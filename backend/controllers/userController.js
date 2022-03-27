@@ -88,6 +88,18 @@ const loginUser = async (req, res) => {
   }
 };
 
+// @desc    Get current user
+// @route   /auth/me
+// @access  Private
+const getMe = async (req, res) => {
+  try {
+    res.send("Me!!!");
+  } catch (error) {
+    console.error(error.message);
+    res.status(401).send("Not Authorize");
+  }
+};
+
 //Generate JWT Token function
 const generateToken = (user_id) => {
   //jwt sign
@@ -97,4 +109,4 @@ const generateToken = (user_id) => {
   });
 };
 //export our functions
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser, getMe };
