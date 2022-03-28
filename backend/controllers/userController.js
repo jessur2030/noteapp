@@ -1,11 +1,12 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { use } = require("../utils/utils");
 
 // @desc    Register a new user
 // @route   /auth/register
 // @access  Public
-const registerUser = async (req, res) => {
+const registerUser = use(async (req, res) => {
   try {
     //1. destructure the req.body (name, email, password)
     const { name, email, password } = req.body;
@@ -22,7 +23,8 @@ const registerUser = async (req, res) => {
     );
 
     if (userExits.rows.length !== 0) {
-      return res.status(401).send("An account already exists with this email.");
+      res.status(400);
+      throw new Error("An account already exists with this email.");
     }
 
     //3. Bcrypt th user password
@@ -45,19 +47,21 @@ const registerUser = async (req, res) => {
         token: generateToken(user.rows[0].user_id),
       });
     } else {
-      res.status(400).send("Invalid user data");
+      res.status(400);
+      throw new Error("Invalid user data");
       //   throw new Error("Invalid user data");
     }
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+    console.error(err);
+    res.status(401);
+    throw new Error("Invalid user data");
   }
-};
+});
 
 // @desc    Login a user
 // @route   /auth/login
 // @access  Public
-const loginUser = async (req, res) => {
+const loginUser = use(async (req, res) => {
   try {
     //1. destructure the req.body
     const { email, password } = req.body;
@@ -67,7 +71,8 @@ const loginUser = async (req, res) => {
       email,
     ]);
     if (user.rows.length === 0) {
-      return res.status(401).json("Invalid credentials");
+      res.status(401);
+      throw new Error("Invalid credentials");
     }
     //3. check if user incoming plain text password match to hashed password on our database
     if (user && (await bcrypt.compare(password, user.rows[0].user_password))) {
@@ -78,27 +83,30 @@ const loginUser = async (req, res) => {
         token: generateToken(user.rows[0].user_id),
       });
     } else {
-      return res.status(401).json("Invalid credentials");
+      res.status(401);
+      throw new Error("Invalid credentials");
     }
 
     //4. give them jwt token
-  } catch (error) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+  } catch (err) {
+    console.error(err);
+    res.status(401);
+    throw new Error("Invalid credentials");
   }
-};
+});
 
 // @desc    Get current user
 // @route   /auth/me
 // @access  Private
-const getMe = async (req, res) => {
+const getMe = use(async (req, res) => {
   try {
     res.send("Me!!!");
-  } catch (error) {
-    console.error(error.message);
-    res.status(401).send("Not Authorize");
+  } catch (err) {
+    console.error(err);
+    res.status(401);
+    throw new Error("Not Authorized");
   }
-};
+});
 
 //Generate JWT Token function
 const generateToken = (user_id) => {

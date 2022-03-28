@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv").config();
+const { errorHandler } = require("./middleware/errorMiddleware");
 const morgan = require("morgan");
 const cors = require("cors");
 const PORT = process.env.PORT || 6000;
@@ -19,6 +20,9 @@ app.use(morgan("dev"));
 
 //register & login routes
 app.use("/auth", require("./routes/userRoutes"));
+
+//error handler middleware
+app.use(errorHandler);
 
 app.listen(PORT, (req, res) => {
   console.log(`server started on ${process.env.NODE_ENV}, on port ${PORT}`);

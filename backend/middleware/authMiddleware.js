@@ -1,8 +1,9 @@
 const pool = require("../config/db");
 const jwt = require("jsonwebtoken");
+const { use } = require("../utils/utils");
 
 //protect route function middleware
-const protect = async (req, res, next) => {
+const protect = use(async (req, res, next) => {
   let token;
   //check for token in the headers
   if (
@@ -25,17 +26,18 @@ const protect = async (req, res, next) => {
 
       //call next
       next();
-    } catch (error) {
-      //
-      console.error(error.message);
-      res.status(401).send("Not authorized");
+    } catch (err) {
+      console.error(err);
+      res.status(401);
+
+      throw new Error("Not authorized");
     }
   }
 
   if (!token) {
-    console.error(error.message);
-    res.status(401).send("Not authorized");
+    res.status(401);
+    throw new Error("Not authorized");
   }
-};
+});
 
 module.exports = { protect };
