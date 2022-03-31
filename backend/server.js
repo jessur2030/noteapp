@@ -21,6 +21,9 @@ app.use(morgan("dev"));
 //register & login routes
 app.use("/auth", require("./routes/userRoutes"));
 
+//notes routes
+app.use("/notes", require("./routes/noteRoutes"));
+
 //error handler middleware
 app.use(errorHandler);
 

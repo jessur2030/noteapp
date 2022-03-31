@@ -99,13 +99,12 @@ const loginUser = use(async (req, res) => {
 // @route   /auth/me
 // @access  Private
 const getMe = use(async (req, res) => {
-  try {
-    res.send("Me!!!");
-  } catch (err) {
-    console.error(err);
-    res.status(401);
-    throw new Error("Not Authorized");
-  }
+  const user = {
+    user_id: req.user.rows[0].user_id,
+    user_name: req.user.rows[0].user_name,
+    user_email: req.user.rows[0].user_email,
+  };
+  res.status(200).json(user);
 });
 
 //Generate JWT Token function

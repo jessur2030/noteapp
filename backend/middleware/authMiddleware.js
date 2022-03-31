@@ -17,11 +17,14 @@ const protect = use(async (req, res, next) => {
       //Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       // console.log(decoded);
+      // console.log(decoded.user_id);
 
       //Get user from token
-      req.user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
-        decoded.id,
-      ]);
+      //TODO: limit password row
+      req.user = await pool.query(
+        "SELECT * FROM users  WHERE users.user_id = $1",
+        [decoded.user_id]
+      );
       // console.log(req.user);
 
       //call next
