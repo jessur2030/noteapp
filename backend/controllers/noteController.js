@@ -54,6 +54,7 @@ const updateNote = use(async (req, res) => {
     const { id } = req.params;
     //Get user using the id in the JWT
     const { user_id } = req.user.rows[0];
+
     const { title, content, favorites } = req.body;
 
     const updatedNote = await pool.query(

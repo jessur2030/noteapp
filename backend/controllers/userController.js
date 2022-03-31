@@ -107,6 +107,59 @@ const getMe = use(async (req, res) => {
   res.status(200).json(user);
 });
 
+//@desc update updateUserProfile
+//@route PUT /users/:id
+//@access PRIVATE
+const updateUser = use(async (req, res) => {
+  try {
+    //destructure from the body
+    const { user_name, user_email, user_password } = req.body;
+    //Get user using the id in the JWT
+    const { user_id } = req.user.rows[0];
+
+    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
+      user_id,
+    ]);
+
+    //check if user if found
+    if (user) {
+      user.rows[0].user_name = user_name || user.rows[0].user_name;
+      user.rows[0].user_email = user_email || user.rows[0].user_email;
+
+      if (user_password) {
+        //salt password
+        const salt = await bcrypt.genSaltSync(10);
+        //hash password
+        const hashedPassword = await bcrypt.hash(user_password, salt);
+
+        user.rows[0].user_password = hashedPassword;
+      }
+
+      // console.log(user.rows[0].user_password);
+      // console.log(hashedPassword);
+
+      await pool.query(
+        "UPDATE users SET user_name = $1, user_email = $2, user_password = $3 WHERE user_id = $4 RETURNING *",
+        [
+          user.rows[0].user_name,
+          user.rows[0].user_email,
+          user.rows[0].user_password,
+          user_id,
+        ]
+      );
+
+      res.status(200).json(user.rows[0]);
+    } else {
+      res.status(404);
+      throw new Error("User Not Found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(401);
+    throw new Error("User not authorized");
+  }
+});
+
 //Generate JWT Token function
 const generateToken = (user_id) => {
   //jwt sign
@@ -116,4 +169,4 @@ const generateToken = (user_id) => {
   });
 };
 //export our functions
-module.exports = { registerUser, loginUser, getMe };
+module.exports = { registerUser, loginUser, getMe, updateUser };
